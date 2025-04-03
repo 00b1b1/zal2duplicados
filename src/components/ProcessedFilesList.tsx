@@ -240,7 +240,7 @@ const ProcessedFilesList = () => {
                 <SelectValue placeholder="Seleccionar día" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Todos los días</SelectItem>
+                <SelectItem value="todos">Todos los días</SelectItem>
                 {allDays.map(day => (
                   <SelectItem key={day} value={day}>{day}</SelectItem>
                 ))}
