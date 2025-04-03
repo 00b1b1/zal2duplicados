@@ -96,6 +96,15 @@ const ProcessedFilesList = () => {
     setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
   };
 
+  // Format date with error handling
+  const formatDate = (dateString: string) => {
+    try {
+      return format(parseISO(dateString), 'PP');
+    } catch (e) {
+      return dateString;
+    }
+  };
+
   const filteredFiles = files
     .filter(file => !filterDate || file.uploadDate.includes(filterDate))
     .sort((a, b) => {
@@ -172,11 +181,7 @@ const ProcessedFilesList = () => {
                     </TableCell>
                     <TableCell className="flex items-center gap-2">
                       <Calendar size={16} className="text-dhl-yellow" />
-                      {try {
-                        return format(parseISO(file.uploadDate), 'PP');
-                      } catch (e) {
-                        return file.uploadDate;
-                      }}
+                      {formatDate(file.uploadDate)}
                     </TableCell>
                     <TableCell className="flex items-center gap-2">
                       <User size={16} className="text-dhl-darkgray" />
