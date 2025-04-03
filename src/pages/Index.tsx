@@ -35,7 +35,7 @@ const Index = () => {
       <header className="bg-dhl-yellow py-6 shadow-md">
         <div className="container mx-auto px-4">
           <div className="flex flex-col items-center justify-center">
-            <h1 className="text-3xl font-bold text-dhl-red">Express Excel Ship</h1>
+            <h1 className="text-3xl font-bold text-dhl-red">Pedidos Duplicados - ZAL Seco</h1>
             <p className="text-dhl-darkgray mt-2">Procesador de Pedidos Excel a PDF</p>
           </div>
         </div>
@@ -93,7 +93,7 @@ const Index = () => {
       <footer className="bg-dhl-darkgray text-white py-4 mt-8">
         <div className="container mx-auto px-4 text-center">
           <p className="text-sm">
-            &copy; {new Date().getFullYear()} Express Excel Ship | Diseño Inspirado en DHL
+            &copy; {new Date().getFullYear()} Desarrollado en DHL Carrefour - ZAL Seco
           </p>
         </div>
       </footer>
