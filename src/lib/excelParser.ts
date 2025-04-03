@@ -16,7 +16,7 @@ export const parseExcelFile = (file: File): Promise<{
         
         // Set options to handle Excel files with macros (.xlsm)
         const options = { 
-          type: 'array',
+          type: 'array' as const,  // Use const assertion to fix type error
           bookVBA: true,  // Keep VBA (macro) code intact
           cellFormula: true,  // Parse cell formulas
           bookDeps: true,  // Parse calculation chain and other dependencies
@@ -48,8 +48,8 @@ export const parseExcelFile = (file: File): Promise<{
                 id: `${day}-${i}`,
                 day,
                 order: row[1].toString(),
-                supplier,
-                details: row[2] ? row[2].toString() : undefined
+                supplier: row[2] ? row[2].toString() : supplier, // Get supplier from column C of same row, fallback to C4
+                details: row[3] ? row[3].toString() : undefined // Details from column D
               });
             }
           }
@@ -61,13 +61,13 @@ export const parseExcelFile = (file: File): Promise<{
           fileName: file.name
         });
       } catch (error) {
-        console.error('Error parsing Excel file:', error);
+        console.error('Error al procesar archivo Excel:', error);
         reject(error);
       }
     };
     
     reader.onerror = (error) => {
-      console.error('FileReader error:', error);
+      console.error('Error de FileReader:', error);
       reject(error);
     };
     

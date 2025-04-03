@@ -23,36 +23,24 @@ export const generatePDF = (
     ordersToInclude = ordersToInclude.filter(order => order.id === selectedOrderId);
   }
   
-  // Set initial page and position
-  let currentPage = 1;
-  let yPosition = 30;
-  const maxY = 280; // Maximum y-position before creating a new page
-  
-  // Add header to first page
-  addHeader(pdf, fileData);
-  
-  // Process each order
+  // Process each order - one order per page
   ordersToInclude.forEach((order, index) => {
-    // Check if we need a new page
-    if (yPosition > maxY) {
+    // Add a new page for each order after the first one
+    if (index > 0) {
       pdf.addPage();
-      currentPage++;
-      yPosition = 30;
-      addHeader(pdf, fileData);
     }
     
-    // Add order details
-    addOrderDetails(pdf, order, yPosition);
-    yPosition += 40; // Move y-position for next order
+    // Add header to each page
+    addHeader(pdf, fileData);
+    
+    // Add order details centered on the page
+    addOrderDetails(pdf, order, 70);
+    
+    // Add footer with page numbers
+    addFooter(pdf, index + 1, ordersToInclude.length, fileData);
   });
   
-  // Add footer with page numbers to each page
-  for (let i = 1; i <= currentPage; i++) {
-    pdf.setPage(i);
-    addFooter(pdf, i, currentPage, fileData);
-  }
-  
-  return { pdf, pageCount: currentPage };
+  return { pdf, pageCount: ordersToInclude.length };
 };
 
 const addHeader = (pdf: jsPDF, fileData: ProcessedFile) => {
@@ -63,7 +51,7 @@ const addHeader = (pdf: jsPDF, fileData: ProcessedFile) => {
   pdf.setFont('helvetica', 'bold');
   pdf.setTextColor(212, 5, 17); // DHL Red
   pdf.setFontSize(16);
-  pdf.text('Informe de Resumen de Pedidos', 105, 12, { align: 'center' });
+  pdf.text('Informe de Pedidos', 105, 12, { align: 'center' });
   
   // Add file metadata
   pdf.setFontSize(10);
@@ -71,34 +59,42 @@ const addHeader = (pdf: jsPDF, fileData: ProcessedFile) => {
   pdf.setFont('helvetica', 'normal');
   pdf.text(`Archivo: ${fileData.fileName}`, 10, 25);
   pdf.text(`Fecha: ${fileData.uploadDate}`, 10, 30);
-  pdf.text(`Subido por: ${fileData.uploadedBy}`, 10, 35);
+  pdf.text(`Procesado por: ${fileData.uploadedBy}`, 10, 35);
 };
 
 const addOrderDetails = (pdf: jsPDF, order: OrderData, y: number) => {
-  // Add box for each order
+  // Add box for each order - larger and more prominent
   pdf.setFillColor(245, 245, 245);
-  pdf.roundedRect(20, y - 5, 170, 35, 3, 3, 'F');
+  pdf.roundedRect(20, y - 10, 170, 120, 3, 3, 'F');
   
   // Add border with DHL yellow
   pdf.setDrawColor(255, 204, 0);
   pdf.setLineWidth(0.5);
-  pdf.roundedRect(20, y - 5, 170, 35, 3, 3, 'S');
+  pdf.roundedRect(20, y - 10, 170, 120, 3, 3, 'S');
   
   // Add order details
   pdf.setFont('helvetica', 'bold');
-  pdf.setTextColor(0);
-  pdf.setFontSize(12);
-  pdf.text(`Día: ${order.day}`, 25, y + 5);
-  pdf.text(`Pedido: ${order.order}`, 25, y + 15);
+  pdf.setTextColor(212, 5, 17); // DHL Red
+  pdf.setFontSize(14);
+  pdf.text(`Día: ${order.day}`, 105, y, { align: 'center' });
   
-  pdf.setFont('helvetica', 'normal');
-  pdf.setFontSize(11);
-  pdf.text(`Proveedor: ${order.supplier}`, 25, y + 25);
+  pdf.setFontSize(18);
+  pdf.text(`Pedido: ${order.order}`, 105, y + 20, { align: 'center' });
+  
+  pdf.setFont('helvetica', 'bold');
+  pdf.setFontSize(14);
+  pdf.setTextColor(0);
+  pdf.text(`Proveedor: ${order.supplier}`, 105, y + 40, { align: 'center' });
   
   if (order.details) {
-    pdf.setFontSize(10);
+    pdf.setFont('helvetica', 'normal');
+    pdf.setFontSize(12);
     pdf.setTextColor(85, 85, 85);
-    pdf.text(`Detalles: ${order.details}`, 120, y + 15);
+    pdf.text(`Detalles:`, 30, y + 70);
+    
+    // Use multiline text for details
+    const splitDetails = pdf.splitTextToSize(order.details, 150);
+    pdf.text(splitDetails, 30, y + 80);
   }
 };
 

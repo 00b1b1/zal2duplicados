@@ -36,7 +36,7 @@ const Index = () => {
         <div className="container mx-auto px-4">
           <div className="flex flex-col items-center justify-center">
             <h1 className="text-3xl font-bold text-dhl-red">Express Excel Ship</h1>
-            <p className="text-dhl-darkgray mt-2">Excel to PDF Order Processor</p>
+            <p className="text-dhl-darkgray mt-2">Procesador de Pedidos Excel a PDF</p>
           </div>
         </div>
       </header>
@@ -49,20 +49,20 @@ const Index = () => {
               value="upload" 
               className="data-[state=active]:bg-dhl-yellow data-[state=active]:text-dhl-red"
             >
-              Upload File
+              Subir Archivo
             </TabsTrigger>
             <TabsTrigger 
               value="process" 
               disabled={!processedData}
               className="data-[state=active]:bg-dhl-yellow data-[state=active]:text-dhl-red"
             >
-              Process Orders
+              Procesar Pedidos
             </TabsTrigger>
             <TabsTrigger 
               value="saved"
               className="data-[state=active]:bg-dhl-yellow data-[state=active]:text-dhl-red"
             >
-              Saved Files
+              Archivos Guardados
             </TabsTrigger>
           </TabsList>
 
@@ -93,7 +93,7 @@ const Index = () => {
       <footer className="bg-dhl-darkgray text-white py-4 mt-8">
         <div className="container mx-auto px-4 text-center">
           <p className="text-sm">
-            &copy; {new Date().getFullYear()} Express Excel Ship | DHL-Inspired Design
+            &copy; {new Date().getFullYear()} Express Excel Ship | Diseño Inspirado en DHL
           </p>
         </div>
       </footer>
