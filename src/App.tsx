@@ -6,23 +6,31 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import * as TooltipPrimitive from "@radix-ui/react-tooltip";
+import { useEffect } from "react";
 
 const queryClient = new QueryClient();
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipPrimitive.Provider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
-    </TooltipPrimitive.Provider>
-  </QueryClientProvider>
-);
+const App = () => {
+  useEffect(() => {
+    // Establecer el título del documento
+    document.title = "Pedidos Duplicados - ZAL Seco";
+  }, []);
+
+  return (
+    <QueryClientProvider client={queryClient}>
+      <TooltipPrimitive.Provider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <Routes>
+            <Route path="/" element={<Index />} />
+            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </BrowserRouter>
+      </TooltipPrimitive.Provider>
+    </QueryClientProvider>
+  );
+};
 
 export default App;

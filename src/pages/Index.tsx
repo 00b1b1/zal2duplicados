@@ -1,11 +1,12 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import FileUploader from '@/components/FileUploader';
 import OrderSummary from '@/components/OrderSummary';
 import ProcessedFilesList from '@/components/ProcessedFilesList';
+import NotificationsMenu from '@/components/NotificationsMenu';
 import { OrderData } from '@/types';
-import { Toaster } from '@/components/ui/toaster';
+import { getNotifications } from '@/lib/notifications';
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState('upload');
@@ -14,6 +15,11 @@ const Index = () => {
     orders: OrderData[];
     fileName: string;
   } | null>(null);
+
+  // Set the document title
+  useEffect(() => {
+    document.title = 'Pedidos Duplicados - ZAL Seco';
+  }, []);
 
   const handleFileProcessed = (data: {
     days: string[];
@@ -34,10 +40,11 @@ const Index = () => {
       {/* Header */}
       <header className="bg-dhl-yellow py-6 shadow-md">
         <div className="container mx-auto px-4">
-          <div className="flex flex-col items-center justify-center">
+          <div className="flex items-center justify-between">
             <h1 className="text-3xl font-bold text-dhl-red">Pedidos Duplicados - ZAL Seco</h1>
-            <p className="text-dhl-darkgray mt-2">Procesador de Pedidos Excel a PDF</p>
+            <NotificationsMenu />
           </div>
+          <p className="text-dhl-darkgray mt-2">Procesador de Pedidos Excel a PDF</p>
         </div>
       </header>
 
@@ -97,8 +104,6 @@ const Index = () => {
           </p>
         </div>
       </footer>
-      
-      <Toaster />
     </div>
   );
 };

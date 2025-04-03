@@ -1,21 +1,37 @@
 
 import localforage from 'localforage';
 import { ProcessedFile } from '@/types';
+import { saveNotification } from './notifications';
 
-// Initialize localforage
+// Initialize localforage with a global namespace
 localforage.config({
-  name: 'express-excel-ship',
+  name: 'express-excel-ship-global',
   storeName: 'processedFiles'
 });
 
-// Save a processed file
+// Save a processed file and create notification
 export const saveProcessedFile = async (file: ProcessedFile): Promise<void> => {
   try {
     // Get existing files
     const files = await getProcessedFiles();
     
-    // Add new file
-    files.push(file);
+    // Check if file with same name already exists
+    const existingFileIndex = files.findIndex(f => f.fileName === file.fileName);
+    
+    if (existingFileIndex !== -1) {
+      // Update existing file
+      files[existingFileIndex] = file;
+    } else {
+      // Add new file
+      files.push(file);
+      
+      // Create notification for new file
+      await saveNotification({
+        title: 'Nuevo archivo de pedidos disponible',
+        message: `${file.uploadedBy} ha subido un archivo "${file.fileName}" para los días: ${file.days.join(', ')}`,
+        type: 'info'
+      });
+    }
     
     // Save back to storage
     await localforage.setItem('files', files);
