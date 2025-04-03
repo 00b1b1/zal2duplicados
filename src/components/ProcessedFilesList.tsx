@@ -23,6 +23,7 @@ import { getProcessedFiles, deleteProcessedFile } from '@/lib/storage';
 import { generatePDF } from '@/lib/pdfGenerator';
 import { useToast } from '@/components/ui/use-toast';
 import { format, parseISO } from 'date-fns';
+import { es } from 'date-fns/locale';
 import { Input } from '@/components/ui/input';
 
 const ProcessedFilesList = () => {
@@ -44,8 +45,8 @@ const ProcessedFilesList = () => {
     } catch (error) {
       console.error('Error loading files:', error);
       toast({
-        title: "Error loading files",
-        description: "Could not load saved files.",
+        title: "Error al cargar archivos",
+        description: "No se pudieron cargar los archivos guardados.",
         variant: "destructive"
       });
     } finally {
@@ -58,15 +59,15 @@ const ProcessedFilesList = () => {
       await deleteProcessedFile(id);
       setFiles(files.filter(file => file.id !== id));
       toast({
-        title: "File deleted",
-        description: "The file has been successfully deleted.",
+        title: "Archivo eliminado",
+        description: "El archivo ha sido eliminado correctamente.",
         variant: "default"
       });
     } catch (error) {
       console.error('Error deleting file:', error);
       toast({
-        title: "Error deleting file",
-        description: "There was an error deleting the file.",
+        title: "Error al eliminar archivo",
+        description: "Hubo un error al eliminar el archivo.",
         variant: "destructive"
       });
     }
@@ -78,15 +79,15 @@ const ProcessedFilesList = () => {
       pdf.output('dataurlnewwindow');
       
       toast({
-        title: "PDF Generated",
-        description: `Generated PDF with ${file.orders.length} orders.`,
+        title: "PDF Generado",
+        description: `PDF generado con ${file.orders.length} pedidos.`,
         variant: "default"
       });
     } catch (error) {
       console.error('Error generating PDF:', error);
       toast({
-        title: "Error generating PDF",
-        description: "There was an error creating the PDF.",
+        title: "Error al generar PDF",
+        description: "Hubo un error al crear el PDF.",
         variant: "destructive"
       });
     }
@@ -99,7 +100,7 @@ const ProcessedFilesList = () => {
   // Format date with error handling
   const formatDate = (dateString: string) => {
     try {
-      return format(parseISO(dateString), 'PP');
+      return format(parseISO(dateString), 'PP', { locale: es });
     } catch (e) {
       return dateString;
     }
@@ -117,10 +118,10 @@ const ProcessedFilesList = () => {
     return (
       <Card className="w-full shadow-md">
         <CardHeader className="bg-dhl-yellow">
-          <CardTitle className="text-dhl-red">Saved Files</CardTitle>
+          <CardTitle className="text-dhl-red">Archivos Guardados</CardTitle>
         </CardHeader>
         <CardContent className="p-6 text-center">
-          <p>Loading files...</p>
+          <p>Cargando archivos...</p>
         </CardContent>
       </Card>
     );
@@ -129,13 +130,13 @@ const ProcessedFilesList = () => {
   return (
     <Card className="w-full shadow-md">
       <CardHeader className="bg-dhl-yellow">
-        <CardTitle className="text-dhl-red">Saved Files</CardTitle>
+        <CardTitle className="text-dhl-red">Archivos Guardados</CardTitle>
       </CardHeader>
       <CardContent className="p-6">
         <div className="mb-4">
           <div className="flex items-center gap-2">
             <Calendar size={16} />
-            <span className="text-sm font-semibold">Filter by date:</span>
+            <span className="text-sm font-semibold">Filtrar por fecha:</span>
           </div>
           <Input
             type="date"
@@ -148,9 +149,9 @@ const ProcessedFilesList = () => {
         {filteredFiles.length === 0 ? (
           <div className="text-center py-8 text-gray-500">
             {files.length === 0 ? (
-              <p>No files saved yet. Process an Excel file to save it.</p>
+              <p>No hay archivos guardados aún. Procesa un archivo Excel para guardarlo.</p>
             ) : (
-              <p>No files match the selected filter.</p>
+              <p>No hay archivos que coincidan con el filtro seleccionado.</p>
             )}
           </div>
         ) : (
@@ -158,18 +159,18 @@ const ProcessedFilesList = () => {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Filename</TableHead>
+                  <TableHead>Nombre de archivo</TableHead>
                   <TableHead>
                     <button 
                       className="flex items-center gap-1 hover:text-dhl-red"
                       onClick={toggleSortDirection}
                     >
-                      Date <ArrowUpDown size={14} />
+                      Fecha <ArrowUpDown size={14} />
                     </button>
                   </TableHead>
-                  <TableHead>Uploaded By</TableHead>
-                  <TableHead>Orders</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
+                  <TableHead>Subido por</TableHead>
+                  <TableHead>Pedidos</TableHead>
+                  <TableHead className="text-right">Acciones</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -188,7 +189,7 @@ const ProcessedFilesList = () => {
                       {file.uploadedBy}
                     </TableCell>
                     <TableCell>
-                      {file.orders.length} orders
+                      {file.orders.length} pedidos
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-2">

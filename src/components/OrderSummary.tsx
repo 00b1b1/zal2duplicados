@@ -18,6 +18,7 @@ import { generatePDF } from '@/lib/pdfGenerator';
 import { saveProcessedFile } from '@/lib/storage';
 import { useToast } from '@/components/ui/use-toast';
 import { format } from 'date-fns';
+import { es } from 'date-fns/locale';
 
 interface OrderSummaryProps {
   fileName: string;
@@ -44,8 +45,8 @@ const OrderSummary = ({ fileName, days, orders, onSaved }: OrderSummaryProps) =>
 
     if (type === 'day' && !selectedDay) {
       toast({
-        title: "Selection needed",
-        description: "Please select a day first.",
+        title: "Selección requerida",
+        description: "Por favor seleccione un día primero.",
         variant: "destructive"
       });
       return;
@@ -53,8 +54,8 @@ const OrderSummary = ({ fileName, days, orders, onSaved }: OrderSummaryProps) =>
 
     if (type === 'single' && !selectedOrder) {
       toast({
-        title: "Selection needed",
-        description: "Please select an order first.",
+        title: "Selección requerida",
+        description: "Por favor seleccione un pedido primero.",
         variant: "destructive"
       });
       return;
@@ -67,7 +68,7 @@ const OrderSummary = ({ fileName, days, orders, onSaved }: OrderSummaryProps) =>
       id: Date.now().toString(),
       fileName,
       uploadDate,
-      uploadedBy: uploadedBy || 'Unknown',
+      uploadedBy: uploadedBy || 'Desconocido',
       orders,
       days
     };
@@ -85,15 +86,15 @@ const OrderSummary = ({ fileName, days, orders, onSaved }: OrderSummaryProps) =>
       pdf.output('dataurlnewwindow');
       
       toast({
-        title: "PDF Generated Successfully",
-        description: `Generated PDF with ${orderCount} orders on ${pageCount} pages.`,
+        title: "PDF Generado Exitosamente",
+        description: `PDF generado con ${orderCount} pedidos en ${pageCount} páginas.`,
         variant: "default"
       });
     } catch (error) {
       console.error('Error generating PDF:', error);
       toast({
-        title: "Error generating PDF",
-        description: "There was an error creating the PDF. Please try again.",
+        title: "Error al generar PDF",
+        description: "Hubo un error al crear el PDF. Por favor intente de nuevo.",
         variant: "destructive"
       });
     }
@@ -102,8 +103,8 @@ const OrderSummary = ({ fileName, days, orders, onSaved }: OrderSummaryProps) =>
   const handleSave = async () => {
     if (!uploadDate) {
       toast({
-        title: "Date required",
-        description: "Please enter a date before saving.",
+        title: "Fecha requerida",
+        description: "Por favor ingrese una fecha antes de guardar.",
         variant: "destructive"
       });
       return;
@@ -114,7 +115,7 @@ const OrderSummary = ({ fileName, days, orders, onSaved }: OrderSummaryProps) =>
         id: Date.now().toString(),
         fileName,
         uploadDate,
-        uploadedBy: uploadedBy || 'Unknown',
+        uploadedBy: uploadedBy || 'Desconocido',
         orders,
         days
       };
@@ -122,8 +123,8 @@ const OrderSummary = ({ fileName, days, orders, onSaved }: OrderSummaryProps) =>
       await saveProcessedFile(processedFile);
       
       toast({
-        title: "Saved successfully",
-        description: `File saved with ${orders.length} orders.`,
+        title: "Guardado exitosamente",
+        description: `Archivo guardado con ${orders.length} pedidos.`,
         variant: "default"
       });
       
@@ -131,8 +132,8 @@ const OrderSummary = ({ fileName, days, orders, onSaved }: OrderSummaryProps) =>
     } catch (error) {
       console.error('Error saving file:', error);
       toast({
-        title: "Error saving file",
-        description: "There was an error saving the file. Please try again.",
+        title: "Error al guardar archivo",
+        description: "Hubo un error al guardar el archivo. Por favor intente de nuevo.",
         variant: "destructive"
       });
     }
@@ -142,7 +143,7 @@ const OrderSummary = ({ fileName, days, orders, onSaved }: OrderSummaryProps) =>
     <Card className="w-full shadow-md">
       <CardHeader className="border-b bg-gradient-to-r from-dhl-yellow to-dhl-red">
         <CardTitle className="text-white text-center">
-          Order Summary
+          Resumen de Pedidos
         </CardTitle>
       </CardHeader>
       <CardContent className="p-6">
@@ -150,7 +151,7 @@ const OrderSummary = ({ fileName, days, orders, onSaved }: OrderSummaryProps) =>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="uploadDate" className="flex items-center gap-2">
-                <Calendar size={16} /> Processing Date
+                <Calendar size={16} /> Fecha de Procesamiento
               </Label>
               <Input
                 id="uploadDate"
@@ -162,11 +163,11 @@ const OrderSummary = ({ fileName, days, orders, onSaved }: OrderSummaryProps) =>
             </div>
             <div className="space-y-2">
               <Label htmlFor="uploadedBy" className="flex items-center gap-2">
-                <FileText size={16} /> Uploaded By
+                <FileText size={16} /> Subido Por
               </Label>
               <Input
                 id="uploadedBy"
-                placeholder="Enter your name"
+                placeholder="Ingrese su nombre"
                 value={uploadedBy}
                 onChange={(e) => setUploadedBy(e.target.value)}
                 className="border-dhl-gray focus:border-dhl-yellow"
@@ -177,35 +178,35 @@ const OrderSummary = ({ fileName, days, orders, onSaved }: OrderSummaryProps) =>
           <div className="bg-gray-50 p-4 rounded-md">
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 gap-4">
               <div>
-                <h3 className="font-bold text-dhl-darkgray">File Summary</h3>
+                <h3 className="font-bold text-dhl-darkgray">Resumen del Archivo</h3>
                 <p className="text-sm text-gray-500">
-                  Filename: {fileName}
+                  Nombre del archivo: {fileName}
                 </p>
                 <p className="text-sm text-gray-500">
-                  Found {orders.length} orders across {days.length} days
+                  Encontrados {orders.length} pedidos en {days.length} días
                 </p>
               </div>
               <Button variant="outline" onClick={handleSave} className="border-dhl-yellow hover:bg-dhl-yellow hover:text-white">
-                <Save size={16} className="mr-2" /> Save to Database
+                <Save size={16} className="mr-2" /> Guardar en Base de Datos
               </Button>
             </div>
           </div>
 
           <Tabs defaultValue="all" className="w-full">
             <TabsList className="grid grid-cols-3 mb-4">
-              <TabsTrigger value="all">All Orders</TabsTrigger>
-              <TabsTrigger value="byDay">By Day</TabsTrigger>
-              <TabsTrigger value="single">Single Order</TabsTrigger>
+              <TabsTrigger value="all">Todos los Pedidos</TabsTrigger>
+              <TabsTrigger value="byDay">Por Día</TabsTrigger>
+              <TabsTrigger value="single">Pedido Individual</TabsTrigger>
             </TabsList>
 
             <TabsContent value="all" className="space-y-4">
               <div className="rounded-md bg-gray-50 p-4">
                 <p className="text-sm text-center text-gray-500 mb-4">
-                  Generate a PDF with all {orders.length} orders
+                  Generar un PDF con todos los {orders.length} pedidos
                 </p>
                 <div className="flex justify-center">
                   <Button onClick={() => handleGeneratePDF('all')} className="bg-dhl-red hover:bg-dhl-red/90 text-white">
-                    <Printer size={16} className="mr-2" /> Print All Orders
+                    <Printer size={16} className="mr-2" /> Imprimir Todos los Pedidos
                   </Button>
                 </div>
               </div>
@@ -215,10 +216,10 @@ const OrderSummary = ({ fileName, days, orders, onSaved }: OrderSummaryProps) =>
               <div className="rounded-md bg-gray-50 p-4">
                 <div className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="daySelect">Select Day</Label>
+                    <Label htmlFor="daySelect">Seleccionar Día</Label>
                     <Select onValueChange={setSelectedDay} value={selectedDay}>
                       <SelectTrigger id="daySelect" className="border-dhl-gray focus:border-dhl-yellow">
-                        <SelectValue placeholder="Select a day" />
+                        <SelectValue placeholder="Seleccione un día" />
                       </SelectTrigger>
                       <SelectContent className="max-h-60">
                         {days.map((day) => (
@@ -232,7 +233,7 @@ const OrderSummary = ({ fileName, days, orders, onSaved }: OrderSummaryProps) =>
 
                   {selectedDay && (
                     <div className="text-sm text-gray-600">
-                      Found {filteredOrders.length} orders for {selectedDay}
+                      Encontrados {filteredOrders.length} pedidos para {selectedDay}
                     </div>
                   )}
 
@@ -242,7 +243,7 @@ const OrderSummary = ({ fileName, days, orders, onSaved }: OrderSummaryProps) =>
                       disabled={!selectedDay}
                       className="bg-dhl-red hover:bg-dhl-red/90 text-white"
                     >
-                      <Printer size={16} className="mr-2" /> Print Selected Day
+                      <Printer size={16} className="mr-2" /> Imprimir Día Seleccionado
                     </Button>
                   </div>
                 </div>
@@ -253,10 +254,10 @@ const OrderSummary = ({ fileName, days, orders, onSaved }: OrderSummaryProps) =>
               <div className="rounded-md bg-gray-50 p-4">
                 <div className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="orderSelect">Select Order</Label>
+                    <Label htmlFor="orderSelect">Seleccionar Pedido</Label>
                     <Select onValueChange={setSelectedOrder} value={selectedOrder}>
                       <SelectTrigger id="orderSelect" className="border-dhl-gray focus:border-dhl-yellow">
-                        <SelectValue placeholder="Select an order" />
+                        <SelectValue placeholder="Seleccione un pedido" />
                       </SelectTrigger>
                       <SelectContent className="max-h-60">
                         {orders.map((order) => (
@@ -274,7 +275,7 @@ const OrderSummary = ({ fileName, days, orders, onSaved }: OrderSummaryProps) =>
                       disabled={!selectedOrder}
                       className="bg-dhl-red hover:bg-dhl-red/90 text-white"
                     >
-                      <Printer size={16} className="mr-2" /> Print Single Order
+                      <Printer size={16} className="mr-2" /> Imprimir Pedido Único
                     </Button>
                   </div>
                 </div>

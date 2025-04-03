@@ -13,7 +13,17 @@ export const parseExcelFile = (file: File): Promise<{
     reader.onload = (e) => {
       try {
         const data = new Uint8Array(e.target?.result as ArrayBuffer);
-        const workbook = XLSX.read(data, { type: 'array' });
+        
+        // Set options to handle Excel files with macros (.xlsm)
+        const options = { 
+          type: 'array',
+          bookVBA: true,  // Keep VBA (macro) code intact
+          cellFormula: true,  // Parse cell formulas
+          bookDeps: true,  // Parse calculation chain and other dependencies
+          WTF: true  // Show errors
+        };
+        
+        const workbook = XLSX.read(data, options);
         
         // Get all sheet names (days of the week)
         const days = workbook.SheetNames;
@@ -25,7 +35,7 @@ export const parseExcelFile = (file: File): Promise<{
           const worksheet = workbook.Sheets[day];
           
           // Get the supplier from cell C4
-          const supplier = worksheet['C4']?.v || 'Unknown Supplier';
+          const supplier = worksheet['C4']?.v || 'Proveedor desconocido';
           
           // Convert worksheet to JSON starting from row 5 (where the data begins)
           const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, range: 4 });
@@ -51,11 +61,16 @@ export const parseExcelFile = (file: File): Promise<{
           fileName: file.name
         });
       } catch (error) {
+        console.error('Error parsing Excel file:', error);
         reject(error);
       }
     };
     
-    reader.onerror = (error) => reject(error);
+    reader.onerror = (error) => {
+      console.error('FileReader error:', error);
+      reject(error);
+    };
+    
     reader.readAsArrayBuffer(file);
   });
 };
