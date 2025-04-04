@@ -1,7 +1,7 @@
 
 import localforage from 'localforage';
 import { ProcessedFile } from '@/types';
-import { saveNotification } from './notifications';
+import { createFileNotification } from './notifications';
 
 // Initialize localforage with a global namespace
 localforage.config({
@@ -30,12 +30,8 @@ export const saveProcessedFile = async (file: ProcessedFile): Promise<void> => {
       // Add new file
       files.push(file);
       
-      // Create notification for new file
-      await saveNotification({
-        title: 'Nuevo archivo de pedidos disponible',
-        message: `${file.uploadedBy} ha subido un archivo "${file.fileName}" para los días: ${file.days.join(', ')}`,
-        type: 'info'
-      });
+      // Create enhanced notification for new file
+      await createFileNotification(file.fileName, file.uploadedBy, file.days);
     }
     
     // Save back to storage with global setting

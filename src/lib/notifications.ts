@@ -1,5 +1,6 @@
 
 import localforage from 'localforage';
+import { supabase } from '@/integrations/supabase/client';
 
 export interface Notification {
   id: string;
@@ -13,7 +14,12 @@ export interface Notification {
 // Initialize localforage for notifications
 localforage.config({
   name: 'express-excel-ship-notifications',
-  storeName: 'notifications'
+  storeName: 'notifications',
+  driver: [
+    localforage.INDEXEDDB,
+    localforage.WEBSQL,
+    localforage.LOCALSTORAGE
+  ]
 });
 
 // Save a new notification
@@ -88,5 +94,37 @@ export const deleteNotification = async (notificationId: string): Promise<void> 
   } catch (error) {
     console.error('Error deleting notification:', error);
     throw error;
+  }
+};
+
+// Create a notification with featured day information when available
+export const createFileNotification = async (fileName: string, uploadedBy: string, days: string[]): Promise<void> => {
+  try {
+    // Check if there's a featured day for this file
+    const { data, error } = await supabase
+      .from('featured_days')
+      .select('*')
+      .eq('file_id', fileName)
+      .single();
+    
+    if (error && error.code !== 'PGRST116') { // PGRST116 is the error for no rows returned
+      console.error('Error fetching featured day:', error);
+    }
+    
+    let message = `${uploadedBy} ha subido un archivo "${fileName}" para los días: ${days.join(', ')}`;
+    
+    // If there's a featured day, highlight it in the notification
+    if (data) {
+      const { day, day_of_week } = data;
+      message = `${uploadedBy} ha subido un archivo "${fileName}" destacando el día ${day} (${day_of_week})`;
+    }
+    
+    await saveNotification({
+      title: 'Nuevo archivo de pedidos disponible',
+      message,
+      type: 'info'
+    });
+  } catch (error) {
+    console.error('Error creating file notification:', error);
   }
 };

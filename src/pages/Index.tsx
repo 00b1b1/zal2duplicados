@@ -1,12 +1,11 @@
 
 import { useState, useEffect } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import FileUploader from '@/components/FileUploader';
+import FileUploaderWrapper from '@/components/FileUploaderWrapper';
 import OrderSummary from '@/components/OrderSummary';
-import ProcessedFilesList from '@/components/ProcessedFilesList';
-import NotificationsMenu from '@/components/NotificationsMenu';
+import ProcessedFilesListEnhanced from '@/components/ProcessedFilesListEnhanced';
 import { OrderData } from '@/types';
-import { getNotifications } from '@/lib/notifications';
+import NavBar from '@/components/NavBar';
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState('upload');
@@ -38,15 +37,7 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-gray-50 font-nunito">
       {/* Header */}
-      <header className="bg-dhl-yellow py-6 shadow-md">
-        <div className="container mx-auto px-4">
-          <div className="flex items-center justify-between">
-            <h1 className="text-3xl font-bold text-dhl-red">Pedidos Duplicados - ZAL Seco</h1>
-            <NotificationsMenu />
-          </div>
-          <p className="text-dhl-darkgray mt-2">Procesador de Pedidos Excel a PDF</p>
-        </div>
-      </header>
+      <NavBar />
 
       {/* Main Content */}
       <main className="container mx-auto px-4 py-8">
@@ -75,7 +66,7 @@ const Index = () => {
 
           <TabsContent value="upload" className="space-y-4">
             <div className="max-w-3xl mx-auto">
-              <FileUploader onFileProcessed={handleFileProcessed} />
+              <FileUploaderWrapper onFileProcessed={handleFileProcessed} />
             </div>
           </TabsContent>
 
@@ -91,7 +82,7 @@ const Index = () => {
           </TabsContent>
 
           <TabsContent value="saved" className="space-y-4">
-            <ProcessedFilesList />
+            <ProcessedFilesListEnhanced />
           </TabsContent>
         </Tabs>
       </main>
