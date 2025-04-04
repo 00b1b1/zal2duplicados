@@ -8,6 +8,7 @@ interface User {
   id: string;
   username: string;
   role: string;
+  canUpload?: boolean;
 }
 
 interface AuthContextType {
@@ -17,6 +18,7 @@ interface AuthContextType {
   login: (username: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
   createUser?: (username: string, password: string, role: string) => Promise<void>;
+  isRegistrationEnabled: boolean;
 }
 
 // Create context
@@ -27,10 +29,27 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [isRegistrationEnabled, setIsRegistrationEnabled] = useState<boolean>(true);
   const { toast } = useToast();
 
-  // Check for user on mount
+  // Check for registration status and user on mount
   useEffect(() => {
+    const fetchRegistrationStatus = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('app_config')
+          .select('value')
+          .eq('key', 'registration_enabled')
+          .single();
+        
+        if (data) {
+          setIsRegistrationEnabled(data.value === '1');
+        }
+      } catch (error) {
+        console.error('Error fetching registration status:', error);
+      }
+    };
+
     const checkUser = async () => {
       setIsLoading(true);
       try {
@@ -46,6 +65,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
     };
 
+    fetchRegistrationStatus();
     checkUser();
   }, []);
 
@@ -55,54 +75,39 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setError(null);
     
     try {
-      // Special case for admin password - direct mode
-      if (password === 'zaladmin2025') {
-        // Skip the login and redirect to a page where they can create a new user
-        const tempUser: User = {
-          id: 'temp-admin',
-          username: 'temp-admin',
-          role: 'admin'
-        };
-        setUser(tempUser);
-        localStorage.setItem('user', JSON.stringify(tempUser));
-        toast({
-          title: "Modo administrador",
-          description: "Has ingresado en modo de creación de usuarios",
-          variant: "default",
-        });
-        return;
-      }
-
       // Use the generic approach to avoid type errors
       const { data, error } = await supabase
         .from('users')
         .select('*')
         .eq('username', username)
-        .single();
+        .maybeSingle();
       
       if (error) {
         throw new Error('Credenciales inválidas');
       }
       
-      if (data) {
-        // Compare the password with the stored one
-        if (data.password === password) {
-          const userData: User = {
-            id: data.id,
-            username: data.username,
-            role: data.role
-          };
-          
-          setUser(userData);
-          localStorage.setItem('user', JSON.stringify(userData));
-          toast({
-            title: "Inicio de sesión exitoso",
-            description: `Bienvenido, ${userData.username}`,
-            variant: "default",
-          });
-        } else {
-          throw new Error('Contraseña incorrecta');
-        }
+      if (!data) {
+        throw new Error('Usuario no encontrado');
+      }
+      
+      // Compare the password with the stored one
+      if (data.password === password) {
+        const userData: User = {
+          id: data.id,
+          username: data.username,
+          role: data.role,
+          canUpload: data.can_upload
+        };
+        
+        setUser(userData);
+        localStorage.setItem('user', JSON.stringify(userData));
+        toast({
+          title: "Inicio de sesión exitoso",
+          description: `Bienvenido, ${userData.username}`,
+          variant: "default",
+        });
+      } else {
+        throw new Error('Contraseña incorrecta');
       }
     } catch (error: any) {
       console.error('Login error:', error);
@@ -117,12 +122,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  // Create User function (admin only)
+  // Create User function
   const createUser = async (username: string, password: string, role: string) => {
     setIsLoading(true);
     setError(null);
     
     try {
+      // Check if registration is enabled
+      if (!isRegistrationEnabled) {
+        throw new Error('El registro de usuarios está desactivado actualmente');
+      }
+      
       // Check if user already exists
       const { data: existingUser, error: existingError } = await supabase
         .from('users')
@@ -139,9 +149,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         .from('users')
         .insert({
           username,
-          password, // store plaintext for backward compatibility
-          bcrypt_password: password, // for now, storing plaintext in bcrypt_password field for simplicity
-          role
+          password,
+          bcrypt_password: password, // for now, storing plaintext for simplicity
+          role,
+          can_upload: true // New users can upload by default
         });
       
       if (insertError) {
@@ -185,7 +196,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   return (
-    <AuthContext.Provider value={{ user, isLoading, error, login, logout, createUser }}>
+    <AuthContext.Provider value={{ 
+      user, 
+      isLoading, 
+      error, 
+      login, 
+      logout, 
+      createUser,
+      isRegistrationEnabled 
+    }}>
       {children}
     </AuthContext.Provider>
   );

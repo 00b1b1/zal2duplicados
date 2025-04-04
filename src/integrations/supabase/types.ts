@@ -9,6 +9,30 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      app_config: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          id: string
+          key: string
+          value: string
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          key: string
+          value: string
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          key?: string
+          value?: string
+        }
+        Relationships: []
+      }
       featured_days: {
         Row: {
           created_at: string | null
@@ -36,6 +60,7 @@ export type Database = {
       users: {
         Row: {
           bcrypt_password: string
+          can_upload: boolean | null
           created_at: string | null
           id: string
           password: string
@@ -44,6 +69,7 @@ export type Database = {
         }
         Insert: {
           bcrypt_password: string
+          can_upload?: boolean | null
           created_at?: string | null
           id?: string
           password: string
@@ -52,6 +78,7 @@ export type Database = {
         }
         Update: {
           bcrypt_password?: string
+          can_upload?: boolean | null
           created_at?: string | null
           id?: string
           password?: string

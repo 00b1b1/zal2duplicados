@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Input } from '@/components/ui/input';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { Calendar } from 'lucide-react';
+import { Calendar, AlertTriangle } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 
 // Days of the week in Spanish
@@ -41,6 +41,16 @@ const FileUploaderWrapper = ({ onFileProcessed }: FileUploaderWrapperProps) => {
     orders: OrderData[];
     fileName: string;
   }) => {
+    // Check if user has upload permissions
+    if (!user || user.canUpload === false) {
+      toast({
+        title: "Permiso denegado",
+        description: "No tiene permisos para subir archivos.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     // Validate if a day is selected when there are available days
     if (data.days.length > 0 && (!selectedDay || !dayOfWeek)) {
       toast({
@@ -85,6 +95,39 @@ const FileUploaderWrapper = ({ onFileProcessed }: FileUploaderWrapperProps) => {
       });
     }
   };
+
+  // If user is not logged in or doesn't have upload permissions, show warning
+  if (!user) {
+    return (
+      <Card className="w-full shadow-md">
+        <CardHeader className="bg-dhl-yellow">
+          <CardTitle className="text-dhl-red">Subir Archivo Excel</CardTitle>
+        </CardHeader>
+        <CardContent className="p-6">
+          <div className="flex items-center gap-2 p-4 bg-amber-50 text-amber-700 rounded-md">
+            <AlertTriangle size={20} />
+            <p>Inicie sesión para subir archivos.</p>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (user.canUpload === false) {
+    return (
+      <Card className="w-full shadow-md">
+        <CardHeader className="bg-dhl-yellow">
+          <CardTitle className="text-dhl-red">Subir Archivo Excel</CardTitle>
+        </CardHeader>
+        <CardContent className="p-6">
+          <div className="flex items-center gap-2 p-4 bg-red-50 text-red-700 rounded-md">
+            <AlertTriangle size={20} />
+            <p>No tiene permisos para subir archivos. Contacte al administrador.</p>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card className="w-full shadow-md">
