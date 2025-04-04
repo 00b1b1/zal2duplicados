@@ -217,7 +217,7 @@ const OrderSummary = ({ fileName, days, orders, onSaved }: OrderSummaryProps) =>
                 <div className="space-y-4">
                   <div className="space-y-2">
                     <Label htmlFor="daySelect">Seleccionar Día</Label>
-                    <Select onValueChange={setSelectedDay} value={selectedDay}>
+                    <Select onValueChange={setSelectedDay} value={selectedDay || ""}>
                       <SelectTrigger id="daySelect" className="border-dhl-gray focus:border-dhl-yellow">
                         <SelectValue placeholder="Seleccione un día" />
                       </SelectTrigger>
@@ -255,7 +255,7 @@ const OrderSummary = ({ fileName, days, orders, onSaved }: OrderSummaryProps) =>
                 <div className="space-y-4">
                   <div className="space-y-2">
                     <Label htmlFor="orderSelect">Seleccionar Pedido</Label>
-                    <Select onValueChange={setSelectedOrder} value={selectedOrder}>
+                    <Select onValueChange={setSelectedOrder} value={selectedOrder || ""}>
                       <SelectTrigger id="orderSelect" className="border-dhl-gray focus:border-dhl-yellow">
                         <SelectValue placeholder="Seleccione un pedido" />
                       </SelectTrigger>
