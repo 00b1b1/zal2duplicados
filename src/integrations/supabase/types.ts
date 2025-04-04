@@ -35,6 +35,7 @@ export type Database = {
       }
       users: {
         Row: {
+          bcrypt_password: string
           created_at: string | null
           id: string
           password: string
@@ -42,6 +43,7 @@ export type Database = {
           username: string
         }
         Insert: {
+          bcrypt_password: string
           created_at?: string | null
           id?: string
           password: string
@@ -49,6 +51,7 @@ export type Database = {
           username: string
         }
         Update: {
+          bcrypt_password?: string
           created_at?: string | null
           id?: string
           password?: string
