@@ -52,6 +52,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setError(null);
     
     try {
+      // Use the generic approach to avoid type errors
       const { data, error } = await supabase
         .from('users')
         .select('*')

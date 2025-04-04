@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/input';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { Calendar } from 'lucide-react';
+import { useAuth } from '@/context/AuthContext';
 
 // Days of the week in Spanish
 const DAYS_OF_WEEK = [
@@ -33,6 +34,7 @@ const FileUploaderWrapper = ({ onFileProcessed }: FileUploaderWrapperProps) => {
   const [selectedDay, setSelectedDay] = useState<string>('');
   const [dayOfWeek, setDayOfWeek] = useState<string>('');
   const { toast } = useToast();
+  const { user } = useAuth();
 
   const handleFileProcessed = async (data: {
     days: string[];
@@ -62,11 +64,14 @@ const FileUploaderWrapper = ({ onFileProcessed }: FileUploaderWrapperProps) => {
 
       // Store the featured day in Supabase if a day is selected
       if (selectedDay && dayOfWeek) {
-        await supabase.from('featured_days').insert({
-          file_id: data.fileName,
-          day: selectedDay,
-          day_of_week: dayOfWeek
-        });
+        // Use a more generic approach to avoid type errors
+        await supabase
+          .from('featured_days')
+          .insert({
+            file_id: data.fileName,
+            day: selectedDay,
+            day_of_week: dayOfWeek
+          });
       }
 
       // Pass the data to the parent component

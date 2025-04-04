@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -48,6 +47,8 @@ interface FeaturedDay {
   day: string;
   day_of_week: string;
   file_id: string;
+  id?: string;
+  created_at?: string;
 }
 
 const ProcessedFilesListEnhanced = () => {
@@ -80,7 +81,7 @@ const ProcessedFilesListEnhanced = () => {
       }
       
       if (data) {
-        setFeaturedDays(data);
+        setFeaturedDays(data as FeaturedDay[]);
       }
     } catch (error) {
       console.error('Error loading featured days:', error);
@@ -134,7 +135,6 @@ const ProcessedFilesListEnhanced = () => {
 
   const handleGenerateOptions = async (file: ProcessedFile) => {
     try {
-      // Fetch the full file data if needed
       const fullFile = await getProcessedFileById(file.id);
       if (fullFile) {
         setSelectedFile(fullFile);
@@ -190,7 +190,6 @@ const ProcessedFilesListEnhanced = () => {
           ? selectedFile.orders.filter(o => o.day === selectedDay).length 
           : 1;
       
-      // Open PDF in a new tab
       pdf.output('dataurlnewwindow');
       
       toast({
@@ -199,7 +198,6 @@ const ProcessedFilesListEnhanced = () => {
         variant: "default"
       });
       
-      // Close the sheet
       setIsSheetOpen(false);
     } catch (error) {
       console.error('Error generating PDF:', error);
@@ -215,7 +213,6 @@ const ProcessedFilesListEnhanced = () => {
     setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
   };
 
-  // Format date with error handling
   const formatDate = (dateString: string) => {
     try {
       return format(parseISO(dateString), 'PP', { locale: es });
@@ -224,15 +221,12 @@ const ProcessedFilesListEnhanced = () => {
     }
   };
 
-  // Get all available days from all files
   const allDays = Array.from(new Set(files.flatMap(file => file.days))).sort();
 
-  // Find featured day information for a file
   const getFeaturedDay = (fileId: string) => {
     return featuredDays.find(fd => fd.file_id === fileId);
   };
 
-  // Filter files based on search query (order number or supplier)
   const searchFiles = (files: ProcessedFile[]) => {
     if (!searchQuery) return files;
     
@@ -425,7 +419,6 @@ const ProcessedFilesListEnhanced = () => {
         )}
       </CardContent>
 
-      {/* PDF Generation Options Sheet */}
       <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
         <SheetContent className="sm:max-w-md">
           <SheetHeader>

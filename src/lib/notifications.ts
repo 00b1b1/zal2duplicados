@@ -98,25 +98,33 @@ export const deleteNotification = async (notificationId: string): Promise<void> 
 };
 
 // Create a notification with featured day information when available
+export interface FeaturedDay {
+  day: string;
+  day_of_week: string;
+  file_id: string;
+  id?: string;
+  created_at?: string;
+}
+
+// Create a notification with featured day information when available
 export const createFileNotification = async (fileName: string, uploadedBy: string, days: string[]): Promise<void> => {
   try {
-    // Check if there's a featured day for this file
+    // Check if there's a featured day for this file using a more generic approach
     const { data, error } = await supabase
       .from('featured_days')
       .select('*')
-      .eq('file_id', fileName)
-      .single();
+      .eq('file_id', fileName);
     
-    if (error && error.code !== 'PGRST116') { // PGRST116 is the error for no rows returned
+    if (error) {
       console.error('Error fetching featured day:', error);
     }
     
     let message = `${uploadedBy} ha subido un archivo "${fileName}" para los días: ${days.join(', ')}`;
     
     // If there's a featured day, highlight it in the notification
-    if (data) {
-      const { day, day_of_week } = data;
-      message = `${uploadedBy} ha subido un archivo "${fileName}" destacando el día ${day} (${day_of_week})`;
+    if (data && data.length > 0) {
+      const featuredDay = data[0] as FeaturedDay;
+      message = `${uploadedBy} ha subido un archivo "${fileName}" destacando el día ${featuredDay.day} (${featuredDay.day_of_week})`;
     }
     
     await saveNotification({
