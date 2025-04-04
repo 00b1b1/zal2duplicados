@@ -6,7 +6,12 @@ import { saveNotification } from './notifications';
 // Initialize localforage with a global namespace
 localforage.config({
   name: 'express-excel-ship-global',
-  storeName: 'processedFiles'
+  storeName: 'processedFiles',
+  driver: [
+    localforage.INDEXEDDB,
+    localforage.WEBSQL,
+    localforage.LOCALSTORAGE
+  ]
 });
 
 // Save a processed file and create notification
@@ -33,8 +38,8 @@ export const saveProcessedFile = async (file: ProcessedFile): Promise<void> => {
       });
     }
     
-    // Save back to storage
-    await localforage.setItem('files', files);
+    // Save back to storage with global setting
+    await localforage.setItem('global_files', files);
   } catch (error) {
     console.error('Error saving file:', error);
     throw error;
@@ -44,7 +49,22 @@ export const saveProcessedFile = async (file: ProcessedFile): Promise<void> => {
 // Get all processed files
 export const getProcessedFiles = async (): Promise<ProcessedFile[]> => {
   try {
-    const files = await localforage.getItem<ProcessedFile[]>('files');
+    // First try to get files from the new global location
+    let files = await localforage.getItem<ProcessedFile[]>('global_files');
+    
+    // If no files found in global location, try the old location
+    if (!files) {
+      files = await localforage.getItem<ProcessedFile[]>('files');
+      
+      // If files found in old location, migrate them to the global location
+      if (files && files.length > 0) {
+        await localforage.setItem('global_files', files);
+        console.log('Migrated files to global storage');
+      } else {
+        files = [];
+      }
+    }
+    
     return files || [];
   } catch (error) {
     console.error('Error getting files:', error);
@@ -57,7 +77,7 @@ export const deleteProcessedFile = async (fileId: string): Promise<void> => {
   try {
     const files = await getProcessedFiles();
     const updatedFiles = files.filter(file => file.id !== fileId);
-    await localforage.setItem('files', updatedFiles);
+    await localforage.setItem('global_files', updatedFiles);
   } catch (error) {
     console.error('Error deleting file:', error);
     throw error;

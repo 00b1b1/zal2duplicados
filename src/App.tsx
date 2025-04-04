@@ -8,7 +8,15 @@ import NotFound from "./pages/NotFound";
 import * as TooltipPrimitive from "@radix-ui/react-tooltip";
 import { useEffect } from "react";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 1000 * 60 * 5, // 5 minutes
+      refetchOnWindowFocus: true,
+      retry: 1,
+    },
+  },
+});
 
 const App = () => {
   useEffect(() => {
