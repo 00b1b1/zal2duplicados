@@ -1,17 +1,12 @@
 
 import localforage from 'localforage';
 import { ProcessedFile } from '@/types';
-import { createFileNotification } from './notifications';
+import { saveNotification } from './notifications';
 
 // Initialize localforage with a global namespace
 localforage.config({
   name: 'express-excel-ship-global',
-  storeName: 'processedFiles',
-  driver: [
-    localforage.INDEXEDDB,
-    localforage.WEBSQL,
-    localforage.LOCALSTORAGE
-  ]
+  storeName: 'processedFiles'
 });
 
 // Save a processed file and create notification
@@ -30,12 +25,16 @@ export const saveProcessedFile = async (file: ProcessedFile): Promise<void> => {
       // Add new file
       files.push(file);
       
-      // Create enhanced notification for new file
-      await createFileNotification(file.fileName, file.uploadedBy, file.days);
+      // Create notification for new file
+      await saveNotification({
+        title: 'Nuevo archivo de pedidos disponible',
+        message: `${file.uploadedBy} ha subido un archivo "${file.fileName}" para los días: ${file.days.join(', ')}`,
+        type: 'info'
+      });
     }
     
-    // Save back to storage with global setting
-    await localforage.setItem('global_files', files);
+    // Save back to storage
+    await localforage.setItem('files', files);
   } catch (error) {
     console.error('Error saving file:', error);
     throw error;
@@ -45,22 +44,7 @@ export const saveProcessedFile = async (file: ProcessedFile): Promise<void> => {
 // Get all processed files
 export const getProcessedFiles = async (): Promise<ProcessedFile[]> => {
   try {
-    // First try to get files from the new global location
-    let files = await localforage.getItem<ProcessedFile[]>('global_files');
-    
-    // If no files found in global location, try the old location
-    if (!files) {
-      files = await localforage.getItem<ProcessedFile[]>('files');
-      
-      // If files found in old location, migrate them to the global location
-      if (files && files.length > 0) {
-        await localforage.setItem('global_files', files);
-        console.log('Migrated files to global storage');
-      } else {
-        files = [];
-      }
-    }
-    
+    const files = await localforage.getItem<ProcessedFile[]>('files');
     return files || [];
   } catch (error) {
     console.error('Error getting files:', error);
@@ -73,7 +57,7 @@ export const deleteProcessedFile = async (fileId: string): Promise<void> => {
   try {
     const files = await getProcessedFiles();
     const updatedFiles = files.filter(file => file.id !== fileId);
-    await localforage.setItem('global_files', updatedFiles);
+    await localforage.setItem('files', updatedFiles);
   } catch (error) {
     console.error('Error deleting file:', error);
     throw error;

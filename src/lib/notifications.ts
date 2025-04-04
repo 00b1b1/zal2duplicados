@@ -1,6 +1,5 @@
 
 import localforage from 'localforage';
-import { supabase } from '@/integrations/supabase/client';
 
 export interface Notification {
   id: string;
@@ -14,12 +13,7 @@ export interface Notification {
 // Initialize localforage for notifications
 localforage.config({
   name: 'express-excel-ship-notifications',
-  storeName: 'notifications',
-  driver: [
-    localforage.INDEXEDDB,
-    localforage.WEBSQL,
-    localforage.LOCALSTORAGE
-  ]
+  storeName: 'notifications'
 });
 
 // Save a new notification
@@ -94,45 +88,5 @@ export const deleteNotification = async (notificationId: string): Promise<void> 
   } catch (error) {
     console.error('Error deleting notification:', error);
     throw error;
-  }
-};
-
-// Create a notification with featured day information when available
-export interface FeaturedDay {
-  day: string;
-  day_of_week: string;
-  file_id: string;
-  id?: string;
-  created_at?: string;
-}
-
-// Create a notification with featured day information when available
-export const createFileNotification = async (fileName: string, uploadedBy: string, days: string[]): Promise<void> => {
-  try {
-    // Check if there's a featured day for this file using a more generic approach
-    const { data, error } = await supabase
-      .from('featured_days')
-      .select('*')
-      .eq('file_id', fileName);
-    
-    if (error) {
-      console.error('Error fetching featured day:', error);
-    }
-    
-    let message = `${uploadedBy} ha subido un archivo "${fileName}" para los días: ${days.join(', ')}`;
-    
-    // If there's a featured day, highlight it in the notification
-    if (data && data.length > 0) {
-      const featuredDay = data[0] as FeaturedDay;
-      message = `${uploadedBy} ha subido un archivo "${fileName}" destacando el día ${featuredDay.day} (${featuredDay.day_of_week})`;
-    }
-    
-    await saveNotification({
-      title: 'Nuevo archivo de pedidos disponible',
-      message,
-      type: 'info'
-    });
-  } catch (error) {
-    console.error('Error creating file notification:', error);
   }
 };
