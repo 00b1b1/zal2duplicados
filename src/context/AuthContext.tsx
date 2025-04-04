@@ -55,7 +55,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setError(null);
     
     try {
-      // Special case for admin password
+      // Special case for admin password - direct mode
       if (password === 'zaladmin2025') {
         // Skip the login and redirect to a page where they can create a new user
         const tempUser: User = {
@@ -85,8 +85,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
       
       if (data) {
-        // Compare the password with the plain text one for backward compatibility
-        if (data.password === password || data.bcrypt_password === password) {
+        // Compare the password with the stored one
+        if (data.password === password) {
           const userData: User = {
             id: data.id,
             username: data.username,
@@ -140,7 +140,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         .insert({
           username,
           password, // store plaintext for backward compatibility
-          bcrypt_password: password, // we're storing plaintext in bcrypt_password field for simplicity in this example
+          bcrypt_password: password, // for now, storing plaintext in bcrypt_password field for simplicity
           role
         });
       

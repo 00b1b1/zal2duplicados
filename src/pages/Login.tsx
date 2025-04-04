@@ -7,8 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, User, Key, UserPlus } from 'lucide-react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Loader2, User, Key, UserPlus, LogIn, LogOut } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 const Login = () => {
@@ -18,7 +17,7 @@ const Login = () => {
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [role, setRole] = useState('user');
-  const { user, login, isLoading, error, createUser } = useAuth();
+  const { user, login, isLoading, error, createUser, logout } = useAuth();
   const { toast } = useToast();
   
   // State to track if we're in admin mode
@@ -104,89 +103,100 @@ const Login = () => {
         </CardHeader>
         
         {isAdminMode ? (
-          <form onSubmit={handleCreateUser}>
-            <CardContent className="space-y-4 pt-6">
-              <div className="space-y-2">
-                <Label htmlFor="newUsername">Nombre de Usuario</Label>
-                <div className="flex items-center border rounded-md bg-background pr-3">
-                  <Input
-                    id="newUsername"
-                    placeholder="Ingrese nombre de usuario"
-                    value={newUsername}
-                    onChange={(e) => setNewUsername(e.target.value)}
-                    disabled={isLoading}
-                    className="border-0 focus-visible:ring-0 focus-visible:ring-offset-0"
-                  />
-                  <User className="text-gray-400" size={18} />
+          <>
+            <form onSubmit={handleCreateUser}>
+              <CardContent className="space-y-4 pt-6">
+                <div className="space-y-2">
+                  <Label htmlFor="newUsername">Nombre de Usuario</Label>
+                  <div className="flex items-center border rounded-md bg-background pr-3">
+                    <Input
+                      id="newUsername"
+                      placeholder="Ingrese nombre de usuario"
+                      value={newUsername}
+                      onChange={(e) => setNewUsername(e.target.value)}
+                      disabled={isLoading}
+                      className="border-0 focus-visible:ring-0 focus-visible:ring-offset-0"
+                    />
+                    <User className="text-gray-400" size={18} />
+                  </div>
                 </div>
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="newPassword">Contraseña</Label>
-                <div className="flex items-center border rounded-md bg-background pr-3">
-                  <Input
-                    id="newPassword"
-                    type="password"
-                    placeholder="Ingrese contraseña"
-                    value={newPassword}
-                    onChange={(e) => setNewPassword(e.target.value)}
-                    disabled={isLoading}
-                    className="border-0 focus-visible:ring-0 focus-visible:ring-offset-0"
-                  />
-                  <Key className="text-gray-400" size={18} />
+                
+                <div className="space-y-2">
+                  <Label htmlFor="newPassword">Contraseña</Label>
+                  <div className="flex items-center border rounded-md bg-background pr-3">
+                    <Input
+                      id="newPassword"
+                      type="password"
+                      placeholder="Ingrese contraseña"
+                      value={newPassword}
+                      onChange={(e) => setNewPassword(e.target.value)}
+                      disabled={isLoading}
+                      className="border-0 focus-visible:ring-0 focus-visible:ring-offset-0"
+                    />
+                    <Key className="text-gray-400" size={18} />
+                  </div>
                 </div>
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="confirmPassword">Confirmar Contraseña</Label>
-                <div className="flex items-center border rounded-md bg-background pr-3">
-                  <Input
-                    id="confirmPassword"
-                    type="password"
-                    placeholder="Confirme contraseña"
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    disabled={isLoading}
-                    className="border-0 focus-visible:ring-0 focus-visible:ring-offset-0"
-                  />
-                  <Key className="text-gray-400" size={18} />
+                
+                <div className="space-y-2">
+                  <Label htmlFor="confirmPassword">Confirmar Contraseña</Label>
+                  <div className="flex items-center border rounded-md bg-background pr-3">
+                    <Input
+                      id="confirmPassword"
+                      type="password"
+                      placeholder="Confirme contraseña"
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      disabled={isLoading}
+                      className="border-0 focus-visible:ring-0 focus-visible:ring-offset-0"
+                    />
+                    <Key className="text-gray-400" size={18} />
+                  </div>
                 </div>
-              </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="role">Rol</Label>
+                  <Select value={role} onValueChange={setRole}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Seleccione un rol" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="admin">Administrador</SelectItem>
+                      <SelectItem value="user">Usuario</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </CardContent>
               
-              <div className="space-y-2">
-                <Label htmlFor="role">Rol</Label>
-                <Select value={role} onValueChange={setRole}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Seleccione un rol" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="admin">Administrador</SelectItem>
-                    <SelectItem value="user">Usuario</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </CardContent>
-            
-            <CardFooter className="flex justify-end">
-              <Button
-                type="submit"
-                className="bg-dhl-red hover:bg-dhl-red/90 w-full"
-                disabled={isLoading}
-              >
-                {isLoading ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Creando usuario...
-                  </>
-                ) : (
-                  <>
-                    <UserPlus className="mr-2 h-4 w-4" />
-                    Crear Usuario
-                  </>
-                )}
-              </Button>
-            </CardFooter>
-          </form>
+              <CardFooter className="flex flex-col gap-3">
+                <Button
+                  type="submit"
+                  className="bg-dhl-red hover:bg-dhl-red/90 w-full"
+                  disabled={isLoading}
+                >
+                  {isLoading ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Creando usuario...
+                    </>
+                  ) : (
+                    <>
+                      <UserPlus className="mr-2 h-4 w-4" />
+                      Crear Usuario
+                    </>
+                  )}
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="w-full"
+                  onClick={() => logout()}
+                >
+                  <LogOut className="mr-2 h-4 w-4" />
+                  Salir del modo administrador
+                </Button>
+              </CardFooter>
+            </form>
+          </>
         ) : (
           <form onSubmit={handleSubmit}>
             <CardContent className="space-y-4 pt-6">
@@ -223,9 +233,6 @@ const Login = () => {
                   />
                   <Key className="text-gray-400" size={18} />
                 </div>
-                <p className="text-xs text-gray-500 mt-1">
-                  Ingrese "zaladmin2025" como contraseña para crear usuarios nuevos.
-                </p>
               </div>
             </CardContent>
             <CardFooter className="flex justify-end">
@@ -240,7 +247,10 @@ const Login = () => {
                     Iniciando sesión...
                   </>
                 ) : (
-                  'Iniciar sesión'
+                  <>
+                    <LogIn className="mr-2 h-4 w-4" />
+                    Iniciar sesión
+                  </>
                 )}
               </Button>
             </CardFooter>
