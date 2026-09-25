@@ -1,0 +1,44 @@
+import { jsPDF } from "jspdf";
+import type { Order } from "./orders";
+
+export const createOrdersPdf = (orders: Order[], fileName = "pedidos-duplicados") => {
+  const doc = new jsPDF({ orientation: "landscape", unit: "mm", format: "a4" });
+  orders.forEach((order, index) => {
+    if (index > 0) doc.addPage("a4", "landscape");
+    const width = doc.internal.pageSize.getWidth();
+    doc.setFillColor(212, 0, 29);
+    doc.rect(0, 0, width, 18, "F");
+    doc.setTextColor(255, 255, 255);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(22);
+    doc.text("PEDIDO DUPLICADO", width / 2, 12, { align: "center" });
+    doc.setTextColor(20, 23, 31);
+    doc.setFontSize(12);
+    doc.text(order.day.toLocaleUpperCase("es-ES"), width / 2, 32, { align: "center" });
+    doc.setDrawColor(218, 220, 224);
+    doc.roundedRect(18, 42, width - 36, 78, 3, 3);
+    doc.setFont("helvetica", "normal");
+    doc.setTextColor(90, 96, 107);
+    doc.setFontSize(10);
+    doc.text("NÚMERO DE PEDIDO", 30, 61);
+    doc.text("PROVEEDOR", 30, 91);
+    doc.setTextColor(20, 23, 31);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(20);
+    doc.text(order.orderNumber, 30, 73);
+    doc.setFontSize(15);
+    doc.text(order.supplier, 30, 103, { maxWidth: 145 });
+    doc.setFillColor(247, 226, 229);
+    doc.roundedRect(width - 89, 54, 58, 54, 3, 3, "F");
+    doc.setTextColor(150, 0, 20);
+    doc.setFontSize(11);
+    doc.text("NÚMERO DE CAJAS", width - 60, 70, { align: "center" });
+    doc.setFontSize(30);
+    doc.text(order.boxes, width - 60, 94, { align: "center" });
+    doc.setTextColor(90, 96, 107);
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(8);
+    doc.text("Desarrollado en DHL Carrefour - ZAL Seco", width / 2, 198, { align: "center" });
+  });
+  doc.save(`${fileName}.pdf`);
+};

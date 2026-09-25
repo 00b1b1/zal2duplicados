@@ -1,76 +1,20 @@
+import localforage from "localforage";
+import type { SavedBatch } from "./orders";
 
-import localforage from 'localforage';
-import { ProcessedFile } from '@/types';
-import { saveNotification } from './notifications';
+const store = localforage.createInstance({ name: "pedidos-duplicados-zal", storeName: "batches" });
+const KEY = "saved-batches-v2";
 
-// Initialize localforage with a global namespace
-localforage.config({
-  name: 'express-excel-ship-global',
-  storeName: 'processedFiles'
-});
+export const getSavedBatches = async () => (await store.getItem<SavedBatch[]>(KEY)) ?? [];
 
-// Save a processed file and create notification
-export const saveProcessedFile = async (file: ProcessedFile): Promise<void> => {
-  try {
-    // Get existing files
-    const files = await getProcessedFiles();
-    
-    // Check if file with same name already exists
-    const existingFileIndex = files.findIndex(f => f.fileName === file.fileName);
-    
-    if (existingFileIndex !== -1) {
-      // Update existing file
-      files[existingFileIndex] = file;
-    } else {
-      // Add new file
-      files.push(file);
-      
-      // Create notification for new file
-      await saveNotification({
-        title: 'Nuevo archivo de pedidos disponible',
-        message: `${file.uploadedBy} ha subido un archivo "${file.fileName}" para los días: ${file.days.join(', ')}`,
-        type: 'info'
-      });
-    }
-    
-    // Save back to storage
-    await localforage.setItem('files', files);
-  } catch (error) {
-    console.error('Error saving file:', error);
-    throw error;
-  }
+export const saveBatch = async (batch: SavedBatch) => {
+  const current = await getSavedBatches();
+  const next = [batch, ...current].slice(0, 30);
+  await store.setItem(KEY, next);
+  return next;
 };
 
-// Get all processed files
-export const getProcessedFiles = async (): Promise<ProcessedFile[]> => {
-  try {
-    const files = await localforage.getItem<ProcessedFile[]>('files');
-    return files || [];
-  } catch (error) {
-    console.error('Error getting files:', error);
-    return [];
-  }
-};
-
-// Delete a processed file
-export const deleteProcessedFile = async (fileId: string): Promise<void> => {
-  try {
-    const files = await getProcessedFiles();
-    const updatedFiles = files.filter(file => file.id !== fileId);
-    await localforage.setItem('files', updatedFiles);
-  } catch (error) {
-    console.error('Error deleting file:', error);
-    throw error;
-  }
-};
-
-// Get a single processed file by ID
-export const getProcessedFileById = async (fileId: string): Promise<ProcessedFile | null> => {
-  try {
-    const files = await getProcessedFiles();
-    return files.find(file => file.id === fileId) || null;
-  } catch (error) {
-    console.error('Error getting file:', error);
-    return null;
-  }
+export const deleteBatch = async (id: string) => {
+  const next = (await getSavedBatches()).filter((batch) => batch.id !== id);
+  await store.setItem(KEY, next);
+  return next;
 };
