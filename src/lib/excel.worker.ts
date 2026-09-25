@@ -20,7 +20,7 @@ self.onmessage = (event: MessageEvent<ArrayBuffer>) => {
         phase: `Analizando ${sheetName}`,
         progress: 32 + Math.round(((sheetIndex + 1) / workbook.SheetNames.length) * 45),
       });
-      const rows = XLSX.utils.sheet_to_json<unknown[]>(sheet, { header: 1, raw: false, defval: "" });
+      const rows = XLSX.utils.sheet_to_json<unknown[]>(sheet, { header: 1, raw: false, defval: "", range: 0 });
       const headers = (rows[3] ?? []).map((cell) => normalize(cell).toLocaleUpperCase("es-ES"));
       if (!headers[1]?.includes("PEDIDO") || !headers[2]?.includes("PROVEEDOR")) {
         warnings.push(`${sheetName}: no se encontraron PEDIDO en B4 y PROVEEDOR en C4.`);
