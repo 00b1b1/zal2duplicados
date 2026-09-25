@@ -7,7 +7,7 @@ const dayKey = (value: string) => value.toLocaleLowerCase("es-ES");
 self.onmessage = (event: MessageEvent<ArrayBuffer>) => {
   try {
     self.postMessage({ type: "phase", phase: "Leyendo la estructura del libro", progress: 22 });
-    const workbook = XLSX.read(event.data, { type: "array", bookVBA: true, dense: true });
+    const workbook = XLSX.read(event.data, { type: "array", bookVBA: true });
     const orders: Order[] = [];
     const dayNames = new Map<string, string>();
     const warnings: string[] = [];
