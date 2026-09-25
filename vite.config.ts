@@ -4,7 +4,7 @@ import path from "path";
 import { componentTagger } from "lovable-tagger";
 
 // GitHub Pages serves project sites at /<repository>/.
-const repositoryName = process.env.GITHUB_REPOSITORY?.split("/")[1] ?? "express-excel-ship";
+const repositoryName = process.env.GITHUB_REPOSITORY?.split("/")[1] ?? "zal2duplicados";
 
 export default defineConfig(({ mode }) => ({
   base: `/${repositoryName}/`,

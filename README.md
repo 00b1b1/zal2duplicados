@@ -1,73 +1,27 @@
-# Welcome to your Lovable project
+# Duplicados ZAL Seco
 
-## Project info
+Herramienta local para preparar pedidos duplicados de recepciones DHL / Carrefour ZAL Seco. El Excel se analiza en un Web Worker dentro del navegador. No se envía a un servidor.
 
-**URL**: https://lovable.dev/projects/d9d3d376-9da4-4908-9945-4b757f0d65c8
+## Uso
 
-## How can I edit this code?
+1. Carga un XLSX, XLS o XLSM. Las hojas de jornada deben tener `PEDIDO` en B4 y `PROVEEDOR` en C4; los pedidos comienzan en la fila 5.
+2. Elige la jornada y revisa sus pedidos. La búsqueda filtra la tabla, pero no altera el PDF ni el guardado.
+3. Genera el PDF de la jornada: una página A4 apaisada por pedido. También puedes preparar un pedido individual.
+4. Indica quién realiza el procesamiento y guarda la jornada. Solo se guardan sus pedidos en el almacenamiento local del navegador. El historial permite volver a generar el PDF y confirmar el borrado.
 
-There are several ways of editing your application.
+Los registros del formato anterior se separan automáticamente por día al abrir el historial. Se conservan hasta 30 jornadas. Si se borran los datos del navegador, también desaparece el historial.
 
-**Use Lovable**
+## Desarrollo
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/d9d3d376-9da4-4908-9945-4b757f0d65c8) and start prompting.
-
-Changes made via Lovable will be committed automatically to this repo.
-
-**Use your preferred IDE**
-
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
+```bash
+npm install
+npm run lint
+npm run build
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+El proyecto utiliza Vite, React, TypeScript, Tailwind, XLSX, jsPDF y localforage. La base de producción es `/zal2duplicados/`, con despliegue automático a GitHub Pages desde `main` mediante `.github/workflows/deploy-pages.yml`.
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+## Marca
 
-**Use GitHub Codespaces**
-
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
-
-## What technologies are used for this project?
-
-This project is built with:
-
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/d9d3d376-9da4-4908-9945-4b757f0d65c8) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes it is!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+Los SVG corporativos en `public/brand/` se obtuvieron del encabezado del [DHL Brand Hub](https://www.brandhub.dhl/en). El favicon emplea el DHL Icon de color para tamaños reducidos; el encabezado y el PDF emplean el logotipo estándar. Consulta `public/brand/README.md` para procedencia y colores.

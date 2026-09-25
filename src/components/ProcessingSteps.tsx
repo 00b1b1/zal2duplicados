@@ -1,31 +1,11 @@
-import { Check, FileCheck2, ListFilter, ScanSearch } from "lucide-react";
-import { cn } from "@/lib/utils";
+const steps = ["Leyendo archivo", "Comprobando estructura", "Detectando pedidos", "Separando jornadas", "Preparando resultados"];
 
-const steps = [
-  { label: "Carga", icon: FileCheck2 },
-  { label: "Validación", icon: ScanSearch },
-  { label: "Clasificación", icon: ListFilter },
-  { label: "Finalizado", icon: Check },
-];
-
-export const ProcessingSteps = ({ active }: { active: number }) => (
-  <div className="relative grid grid-cols-4 gap-2" aria-label="Fases del procesamiento">
-    <div className="absolute left-[12%] right-[12%] top-4 h-px bg-border" />
-    {steps.map(({ label, icon: Icon }, index) => {
-      const done = index < active;
-      const current = index === active;
-      return (
-        <div key={label} className="relative z-10 flex min-w-0 flex-col items-center gap-2 text-center">
-          <span className={cn(
-            "grid size-8 place-items-center rounded-full border bg-background text-muted-foreground ring-4 ring-card transition-colors",
-            (done || current) && "border-primary bg-primary text-primary-foreground",
-            current && active < 3 && "animate-pulse",
-          )}>
-            <Icon className="size-4" />
-          </span>
-          <span className={cn("text-[10px] font-bold uppercase text-muted-foreground sm:text-xs", (done || current) && "text-foreground")}>{label}</span>
-        </div>
-      );
+export const ProcessingSteps = ({ phase, complete }: { phase: string; complete: boolean }) => (
+  <ol className="grid gap-2 text-sm sm:grid-cols-5" aria-label="Fases del análisis">
+    {steps.map((step, index) => {
+      const current = phase.startsWith(step);
+      const reached = complete || steps.findIndex((item) => phase.startsWith(item)) > index;
+      return <li key={step} className={`border-l-4 px-2 py-1 ${current ? "border-[#D40511] font-bold" : reached ? "border-[#FFCC00]" : "border-border text-muted-foreground"}`} aria-current={current ? "step" : undefined}>{index + 1}. {step}</li>;
     })}
-  </div>
+  </ol>
 );

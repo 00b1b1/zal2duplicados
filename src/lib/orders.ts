@@ -9,13 +9,14 @@ export type Order = {
 export type DaySummary = {
   day: string;
   orders: number;
+  boxes: number | null;
 };
 
 export type SavedBatch = {
   id: string;
   fileName: string;
   createdAt: string;
-  featuredDay: string;
+  day: string;
   uploader: string;
   orders: Order[];
 };
@@ -24,4 +25,5 @@ export type WorkerResult = {
   orders: Order[];
   days: DaySummary[];
   warnings: string[];
+  validSheets: number;
 };

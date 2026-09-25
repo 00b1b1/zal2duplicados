@@ -1,44 +1,71 @@
 import { jsPDF } from "jspdf";
+import logo from "@/assets/dhl-logo.png";
 import type { Order } from "./orders";
 
-export const createOrdersPdf = (orders: Order[], fileName = "pedidos-duplicados") => {
+export const safeFilePart = (value: string) => value.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-zA-Z0-9_-]+/g, "-").replace(/^-+|-+$/g, "") || "sin-nombre";
+export const dayPdfName = (day: string) => `duplicados-${safeFilePart(day).toUpperCase()}`;
+export const orderPdfName = (orderNumber: string) => `pedido-${safeFilePart(orderNumber)}`;
+
+export const createOrdersPdf = (orders: Order[], fileName: string) => {
+  if (!orders.length) throw new Error("No hay pedidos para el PDF.");
   const doc = new jsPDF({ orientation: "landscape", unit: "mm", format: "a4" });
+  const width = doc.internal.pageSize.getWidth();
+
   orders.forEach((order, index) => {
-    if (index > 0) doc.addPage("a4", "landscape");
-    const width = doc.internal.pageSize.getWidth();
-    doc.setFillColor(212, 0, 29);
-    doc.rect(0, 0, width, 18, "F");
-    doc.setTextColor(255, 255, 255);
+    if (index) doc.addPage("a4", "landscape");
+    doc.setFillColor(255, 204, 0);
+    doc.rect(0, 0, width, 9, "F");
+    doc.addImage(logo, "PNG", 17, 14, 42, 14);
     doc.setFont("helvetica", "bold");
-    doc.setFontSize(22);
-    doc.text("PEDIDO DUPLICADO", width / 2, 12, { align: "center" });
-    doc.setTextColor(20, 23, 31);
-    doc.setFontSize(12);
-    doc.text(order.day.toLocaleUpperCase("es-ES"), width / 2, 32, { align: "center" });
-    doc.setDrawColor(218, 220, 224);
-    doc.roundedRect(18, 42, width - 36, 78, 3, 3);
+    doc.setTextColor(30, 30, 30);
+    doc.setFontSize(14);
+    doc.text("PEDIDO DUPLICADO", 68, 23);
     doc.setFont("helvetica", "normal");
-    doc.setTextColor(90, 96, 107);
     doc.setFontSize(10);
-    doc.text("NÚMERO DE PEDIDO", 30, 61);
-    doc.text("PROVEEDOR", 30, 91);
-    doc.setTextColor(20, 23, 31);
+    doc.text(`JORNADA: ${order.day.toLocaleUpperCase("es-ES")}`, width - 17, 23, { align: "right" });
+    doc.setDrawColor(90, 90, 90);
+    doc.line(17, 34, width - 17, 34);
+
+    doc.setTextColor(95, 95, 95);
     doc.setFont("helvetica", "bold");
-    doc.setFontSize(20);
-    doc.text(order.orderNumber, 30, 73);
-    doc.setFontSize(15);
-    doc.text(order.supplier, 30, 103, { maxWidth: 145 });
-    doc.setFillColor(247, 226, 229);
-    doc.roundedRect(width - 89, 54, 58, 54, 3, 3, "F");
-    doc.setTextColor(150, 0, 20);
-    doc.setFontSize(11);
-    doc.text("NÚMERO DE CAJAS", width - 60, 70, { align: "center" });
-    doc.setFontSize(30);
-    doc.text(order.boxes, width - 60, 94, { align: "center" });
-    doc.setTextColor(90, 96, 107);
+    doc.setFontSize(12);
+    doc.text("N.º PEDIDO", 17, 52);
+    doc.setTextColor(25, 25, 25);
+    doc.setFontSize(54);
+    const orderWidth = width - 34;
+    const orderScale = Math.min(1, orderWidth / doc.getTextWidth(order.orderNumber));
+    doc.setFontSize(Math.max(26, 54 * orderScale));
+    doc.text(order.orderNumber, 17, 76);
+    doc.setDrawColor(212, 5, 17);
+    doc.setLineWidth(1.4);
+    doc.line(17, 86, width - 17, 86);
+
+    doc.setTextColor(95, 95, 95);
+    doc.setFontSize(12);
+    doc.text("PROVEEDOR", 17, 105);
+    doc.setTextColor(25, 25, 25);
+    doc.setFontSize(28);
+    const supplierLines = doc.splitTextToSize(order.supplier, width - 80) as string[];
+    if (supplierLines.length > 2) doc.setFontSize(20);
+    const lines = doc.splitTextToSize(order.supplier, width - 80) as string[];
+    doc.text(lines.slice(0, 3), 17, 120, { lineHeightFactor: 1.15 });
+
+    doc.setFillColor(255, 204, 0);
+    doc.rect(width - 65, 100, 48, 40, "F");
+    doc.setTextColor(25, 25, 25);
+    doc.setFontSize(10);
+    doc.text("CAJAS", width - 41, 111, { align: "center" });
+    doc.setFontSize(27);
+    doc.text(order.boxes, width - 41, 132, { align: "center", maxWidth: 42 });
+
+    doc.setLineWidth(0.2);
+    doc.setDrawColor(170, 170, 170);
+    doc.line(17, 186, width - 17, 186);
     doc.setFont("helvetica", "normal");
-    doc.setFontSize(8);
-    doc.text("Desarrollado en DHL Carrefour - ZAL Seco", width / 2, 198, { align: "center" });
+    doc.setFontSize(9);
+    doc.setTextColor(95, 95, 95);
+    doc.text("ZAL Seco · Preparación de pedidos duplicados", 17, 195);
+    doc.text(`${index + 1} / ${orders.length}`, width - 17, 195, { align: "right" });
   });
-  doc.save(`${fileName}.pdf`);
+  doc.save(`${safeFilePart(fileName)}.pdf`);
 };

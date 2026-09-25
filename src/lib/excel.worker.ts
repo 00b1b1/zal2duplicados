@@ -6,19 +6,21 @@ const dayKey = (value: string) => value.toLocaleLowerCase("es-ES");
 
 self.onmessage = (event: MessageEvent<ArrayBuffer>) => {
   try {
-    self.postMessage({ type: "phase", phase: "Leyendo la estructura del libro", progress: 22 });
+    self.postMessage({ type: "phase", phase: "Leyendo archivo", progress: 16 });
     const workbook = XLSX.read(event.data, { type: "array", bookVBA: true });
+    self.postMessage({ type: "phase", phase: "Comprobando estructura", progress: 30 });
     const orders: Order[] = [];
     const dayNames = new Map<string, string>();
     const warnings: string[] = [];
+    let validSheets = 0;
 
     workbook.SheetNames.forEach((sheetName, sheetIndex) => {
       const sheet = workbook.Sheets[sheetName];
       if (!sheet) return;
       self.postMessage({
         type: "phase",
-        phase: `Analizando ${sheetName}`,
-        progress: 32 + Math.round(((sheetIndex + 1) / workbook.SheetNames.length) * 45),
+        phase: `Detectando pedidos · ${sheetName}`,
+        progress: 35 + Math.round(((sheetIndex + 1) / workbook.SheetNames.length) * 42),
       });
       const bounds = XLSX.utils.decode_range(sheet["!ref"] ?? "A1:A1");
       const rows = XLSX.utils.sheet_to_json<unknown[]>(sheet, {
@@ -32,6 +34,7 @@ self.onmessage = (event: MessageEvent<ArrayBuffer>) => {
         warnings.push(`${sheetName}: no se encontraron PEDIDO en B4 y PROVEEDOR en C4.`);
         return;
       }
+      validSheets += 1;
       const boxesIndex = Math.max(3, headers.findIndex((header) => header.includes("CAJA")));
       const canonicalDay = dayNames.get(dayKey(sheetName)) ?? sheetName.trim();
       dayNames.set(dayKey(sheetName), canonicalDay);
@@ -49,11 +52,19 @@ self.onmessage = (event: MessageEvent<ArrayBuffer>) => {
       });
     });
 
-    self.postMessage({ type: "phase", phase: "Agrupando días y preparando la revisión", progress: 91 });
-    const counts = new Map<string, number>();
-    orders.forEach((order) => counts.set(order.day, (counts.get(order.day) ?? 0) + 1));
-    const days: DaySummary[] = [...counts].map(([day, count]) => ({ day, orders: count }));
-    const result: WorkerResult = { orders, days, warnings };
+    self.postMessage({ type: "phase", phase: "Separando jornadas", progress: 86 });
+    const counts = new Map<string, { orders: number; boxes: number; complete: boolean }>();
+    orders.forEach((order) => {
+      const count = counts.get(order.day) ?? { orders: 0, boxes: 0, complete: true };
+      const boxes = Number(order.boxes.replace(/\s/g, "").replace(",", "."));
+      count.orders += 1;
+      if (order.boxes === "—" || !Number.isFinite(boxes)) count.complete = false;
+      else count.boxes += boxes;
+      counts.set(order.day, count);
+    });
+    const days: DaySummary[] = [...counts].map(([day, count]) => ({ day, orders: count.orders, boxes: count.complete ? count.boxes : null }));
+    self.postMessage({ type: "phase", phase: "Preparando resultados", progress: 96 });
+    const result: WorkerResult = { orders, days, warnings, validSheets };
     self.postMessage({ type: "complete", result });
   } catch (error) {
     self.postMessage({ type: "error", message: error instanceof Error ? error.message : "No se pudo leer el archivo." });
